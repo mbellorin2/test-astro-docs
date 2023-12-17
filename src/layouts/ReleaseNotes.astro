@@ -1,0 +1,49 @@
+---
+extend: "./BaseLayout.astro"
+---
+
+<:astro-extend>
+  <script context="module" lang="js">
+    export { getReleaseNotes };
+  </script>
+
+  <script lang="js">
+    import { getReleaseNotes } from '../util/getReleaseNotes';
+    const { content } = Astro.props;
+
+    export const releaseNotes = getReleaseNotes();
+    const itemsPerPage = 10;
+    const currentPage = +Astro.params.page || 1;
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+
+    export const paginatedReleaseNotes = releaseNotes.slice(start, end);
+  </script>
+
+  <main>
+    <section>
+      <h2>Last 10 Release Notes</h2>
+      {#each paginatedReleaseNotes as releaseNote (releaseNote.id)}
+        <!-- Render each release note here -->
+        <div>
+          <h3>{releaseNote.title}</h3>
+          <p>{releaseNote.description}</p>
+          <!-- Add more details as needed -->
+        </div>
+      {/each}
+
+      <!-- Pagination -->
+      {#if releaseNotes.length > itemsPerPage}
+        <nav>
+          <ul>
+            {#each Array(Math.ceil(releaseNotes.length / itemsPerPage)).keys() as |page| (page)}
+              <li>
+                <a href={`?page=${page + 1}`}>{page + 1}</a>
+              </li>
+            {/each}
+          </ul>
+        </nav>
+      {/if}
+    </section>
+  </main>
+</:astro-extend>
